@@ -28,6 +28,14 @@ def inform(s):
             n += 1
         else: break
 
+# 우측하단 정보 알림용 프레임 비우기 함수.
+def clearinfo():
+    global infolist
+    labelFrame = window.children[notebook.select().strip('.')].children['!frame2'].children['!frame']
+    for widget in labelFrame.winfo_children():
+        widget.destroy()
+    infolist = []
+
 # GCODE 파일의 경로와 이름을 알아낸다.
 # X, Y, Z, F 값을 추출하여 튜플 형태로 저장한다.
 def openGCODE():
@@ -119,7 +127,7 @@ def tab1refresh():
     buttonR3.place(x=12, y=120, width=230, height=30)
     buttonR4 = tkinter.Button(frame1R, text="Export", relief="solid", command=None)
     buttonR4.place(x=12, y=165, width=230, height=30)
-    clearbtn = tkinter.Button(frame1R, text="clear", relief="solid", command=None)
+    clearbtn = tkinter.Button(frame1R, text="clear", relief="solid", command=clearinfo)
     clearbtn.place(x=195, y=244, width=48, height=25)
 
 # 2번 탭으로 이동했을 때 2번 탭 리프레쉬.
@@ -146,9 +154,9 @@ def tab2refresh():
     buttonR2.place(x=12, y=75, width=230, height=30)
     buttonR3 = tkinter.Button(frame2R, text="See Angles", relief="solid", command=None)
     buttonR3.place(x=12, y=120, width=230, height=30)
-    buttonR3 = tkinter.Button(frame2R, text="Export", relief="solid", command=None)
-    buttonR3.place(x=12, y=165, width=230, height=30)
-    clearbtn = tkinter.Button(frame2R, text="clear", relief="solid", command=None)
+    buttonR4 = tkinter.Button(frame2R, text="Export", relief="solid", command=None)
+    buttonR4.place(x=12, y=165, width=230, height=30)
+    clearbtn = tkinter.Button(frame2R, text="clear", relief="solid", command=clearinfo)
     clearbtn.place(x=195, y=244, width=48, height=25)
 
 # 3번 탭으로 이동했을 때 3번 탭 리프레쉬.
