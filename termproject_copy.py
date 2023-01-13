@@ -4,12 +4,20 @@ import tkinter    # GUI tkinter 모듈.
 import tkinter.ttk    # GUI 추가 위젯 모듈.
 import tkinter.font    # GUI 추가 폰트 모듈.
 from tkinter import filedialog    # 파일 가져오기용 모듈.
+import numpy as np    # 행렬식 표현 및 행렬연산용 넘파이 모듈.
+import matplotlib.pyplot as plt    # 3d 그래프 그리기용 matplot 모듈.
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)    # 3d 그래프 GUI 내부출력용 모듈.
+from matplotlib.backend_bases import key_press_handler    # 3d 그래프 GUI 내부 span용 모듈.
+from matplotlib.figure import Figure    # matplot 모듈 Figure 생성용 모듈.
 
 # 전역 변수의 선언
 infolist = []
 gcode_dir = None
 gcode_name = None
-X, Y, Z, F = [], [], [], []
+X = []
+Y = []
+Z = []
+F = []
 
 # 우측하단 프레임에 정보 알림용 라벨 생성 함수.
 def inform(s):
@@ -56,6 +64,7 @@ def openGCODE():
 
     #1) 초기값 설정. X, Y, Z, F 각 정보는 각각의 리스트로 저장됨.
     XHomepos, YHomepos, ZHomepos, Ffirstval = '0', '0', '0', '1000'
+    global X, Y, Z, F
     X = [0]
     Y = [0]
     Z = [0]
@@ -89,10 +98,35 @@ def openGCODE():
         else: Z.append(float(z0))
         if f1: F.append(float(f1)); f0 = f1
         else: F.append(float(f0))
-    X=tuple(X)
-    Y=tuple(Y)
-    Z=tuple(Z)
-    F=tuple(F)
+    # X=tuple(X)
+    # Y=tuple(Y)
+    # Z=tuple(Z)
+    # F=tuple(F)
+    inform(f'import {gcode_dir.name} done')
+
+# 생성된 X,Y,Z가 정상인지 확인하기 위해 numpy에서 3차원 plot으로 시각화해서 확인함.
+def drawgraph():
+    global X, Y, Z, F
+    frame1L = window.children['!frame'].children['!frame']
+    if '!canvas' in frame1L.children.keys():
+        frame1L.children['!canvas'].destroy()
+        frame1L.children['!navigationtoolbar2tk'].destroy()
+    # 1) 그래프 생성.
+    fig = Figure(figsize=(10,10), dpi=500)
+    ax = fig.add_subplot(projection='3d')
+    ax.plot(X, Y, Z, linewidth=0.1, alpha = 0.8)
+    # ax.set_xlim(40,80)
+    # ax.set_ylim(40,80)
+    # ax.set_zlim(-1,39)
+    ax.set_aspect('equal')
+    # 2) GUI에 canvas로 그림.
+    canvas = FigureCanvasTkAgg(fig, master=frame1L)
+    canvas.draw()
+    toolbar = NavigationToolbar2Tk(canvas, frame1L, pack_toolbar=False)
+    toolbar.update()
+    toolbar.place(x=0, y=476, width=800, height=25)
+    canvas.get_tk_widget().place(x=0,y=0, width=800, height=476)
+    inform('plot drawing done')
 
 # GUI내에서 다른 탭으로 이동시 호출되는 함수.
 def tabchange(event):
@@ -107,7 +141,7 @@ def tab1refresh():
     frame1L=tkinter.Frame(frame1, relief="groove", bd=2)
     frame1L.place(x=0,y=0, width=800, height=552)
 
-    buttonL1 = tkinter.Button(frame1L, text="Plot", relief="solid", command=None)
+    buttonL1 = tkinter.Button(frame1L, text="Plot", relief="solid", command=drawgraph)
     buttonL1.place(x=15, y=499, width=90, height=41)
     buttonL2 = tkinter.Button(frame1L, text="Edit Gcode", relief="solid", command=None)
     buttonL2.place(x=110, y=499, width=90, height=41)
