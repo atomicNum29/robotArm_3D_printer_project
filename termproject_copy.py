@@ -1,6 +1,7 @@
 
 import tkinter    # GUI tkinter 모듈.
 import tkinter.ttk    # GUI 추가 위젯 모듈.
+import tkinter.font    # GUI 추가 폰트 모듈.
 
 # GUI내에서 다른 탭으로 이동시 호출되는 함수.
 def tabchange(event):
@@ -10,10 +11,11 @@ def tabchange(event):
         tab1refresh()
     elif tab_id == '.!frame2':
         tab2refresh()
+    elif tab_id == '.!frame3':
+        tab3refresh()
 
 # 1번 탭으로 이동했을 때 1번 탭 리프레쉬.
 def tab1refresh():
-    global frame1L, frame1R, frameR_t
 
     frame1L=tkinter.Frame(frame1, relief="groove", bd=2)
     frame1L.place(x=0,y=0, width=800, height=552)
@@ -43,7 +45,6 @@ def tab1refresh():
 
 # 2번 탭으로 이동했을 때 2번 탭 리프레쉬.
 def tab2refresh():
-    global frame2L, frame2R, frameR_t
 
     frame2L = tkinter.Frame(frame2, relief="groove", bd=2, width=500)
     frame2L.place(x=0,y=0, width=800, height=552)
@@ -70,6 +71,27 @@ def tab2refresh():
     buttonR3.place(x=12, y=165, width=230, height=30)
     clearbtn = tkinter.Button(frame2R, text="clear", relief="solid", command=None)
     clearbtn.place(x=195, y=244, width=48, height=25)
+
+# 3번 탭으로 이동했을 때 3번 탭 리프레쉬.
+def tab3refresh():
+
+    frame3_1 = tkinter.Frame(frame3, relief='groove', bd=5)
+    frame3_1.place(x=310, y=185, width=450, height=140)
+
+    fontstyle1 = tkinter.font.Font(size=17)
+    fontstyle2 = tkinter.font.Font(size=20)
+    surelabel=tkinter.Label(frame3_1, anchor='w', pady=0, text="  Are you sure you want to exit?", bg='#9c9c9c', font=fontstyle1)
+    surelabel.place(x=0, y=0, width=440, height=23)
+    lostlabel=tkinter.Label(frame3_1, anchor='n', pady=10, text="All unsaved changes will be lost", bg='#d4d4d4', font=fontstyle2)
+    lostlabel.place(x=0, y=23, width=440, height=50)
+    lostlabel=tkinter.Label(frame3_1, anchor='n', bg='#f0f0f0')
+    lostlabel.place(x=0, y=73, width=440, height=57)
+
+    yesbutton = tkinter.Button(frame3_1, command=window.destroy, text='YES', width=15, font=fontstyle1)
+    yesbutton.place(x=70, y=90, width=125, height=33)
+    nobutton = tkinter.Button(frame3_1, command=frame3_1.destroy, text='NO', width=15, font=fontstyle1)
+    nobutton.place(x=250, y=90, width=125, height=33)
+
 
 # GUI 생성 및 기본 창 설정.
 window = tkinter.Tk()
