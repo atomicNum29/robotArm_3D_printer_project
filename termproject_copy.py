@@ -6,11 +6,30 @@ import tkinter.font    # GUI 추가 폰트 모듈.
 from tkinter import filedialog    # 파일 가져오기용 모듈.
 
 # 전역 변수의 선언
+infolist = []
 gcode_dir = None
 gcode_name = None
 X, Y, Z, F = [], [], [], []
 
+# 우측하단 프레임에 정보 알림용 라벨 생성 함수.
+def inform(s):
+    global infolist
+    if not notebook.select() in ['.!frame', '.!frame2']:
+        return
+    labelFrame = window.children[notebook.select().strip('.')].children['!frame2'].children['!frame']
+    for widget in labelFrame.winfo_children():
+        widget.destroy()
+    infolist.insert(0, s)
+    n = 0
+    for line in infolist:
+        if n < 8:
+            information = tkinter.Label(labelFrame, text=line, wraplength=225)
+            information.pack(side='bottom', pady=5)
+            n += 1
+        else: break
+
 # GCODE 파일의 경로와 이름을 알아낸다.
+# X, Y, Z, F 값을 추출하여 튜플 형태로 저장한다.
 def openGCODE():
     global gcode_dir, gcode_name
     gcode_dir = filedialog.askopenfile(filetypes=(('gcode files', '*.gcode'), ('all types', '*.*')))
@@ -71,12 +90,8 @@ def openGCODE():
 def tabchange(event):
     tab_id = notebook.select()
     print(tab_id)
-    if tab_id == '.!frame':
-        tab1refresh()
-    elif tab_id == '.!frame2':
-        tab2refresh()
-    elif tab_id == '.!frame3':
-        tab3refresh()
+    inform('tab changed')
+    notebook.select(tab_id)
 
 # 1번 탭으로 이동했을 때 1번 탭 리프레쉬.
 def tab1refresh():
@@ -102,8 +117,8 @@ def tab1refresh():
     buttonR2.place(x=12, y=75, width=230, height=30)
     buttonR3 = tkinter.Button(frame1R, text="See Filtered gcode", relief="solid", command=None)
     buttonR3.place(x=12, y=120, width=230, height=30)
-    buttonR3 = tkinter.Button(frame1R, text="Export", relief="solid", command=None)
-    buttonR3.place(x=12, y=165, width=230, height=30)
+    buttonR4 = tkinter.Button(frame1R, text="Export", relief="solid", command=None)
+    buttonR4.place(x=12, y=165, width=230, height=30)
     clearbtn = tkinter.Button(frame1R, text="clear", relief="solid", command=None)
     clearbtn.place(x=195, y=244, width=48, height=25)
 
@@ -170,6 +185,10 @@ frame2=tkinter.Frame(window)
 notebook.add(frame2, text=" after-process ")
 frame3 = tkinter.Frame(window)
 notebook.add(frame3, text="     exit     ")
+
+tab1refresh()
+tab2refresh()
+tab3refresh()
 
 # 노트북 바인딩 및 GUI 메인루프 실행.
 notebook.bind('<<NotebookTabChanged>>',tabchange)
