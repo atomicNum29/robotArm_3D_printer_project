@@ -8,6 +8,7 @@ from tkinter import filedialog    # 파일 가져오기용 모듈.
 # 전역 변수의 선언
 gcode_dir = None
 gcode_name = None
+X, Y, Z, F = [], [], [], []
 
 # GCODE 파일의 경로와 이름을 알아낸다.
 def openGCODE():
@@ -16,6 +17,55 @@ def openGCODE():
     gcode_name = re.findall('[a-zA-Z]*[.]gcode', gcode_dir.name)[0].removesuffix('.gcode')
     print(gcode_dir.name)
     print(gcode_name)
+    
+    with open(gcode_dir.name, 'r') as gcode:
+        loadlines = list(map(str.strip, gcode.readlines()))
+
+    filtlist = []
+
+    for line in loadlines:
+        if line.startswith('G1'):
+            filtlist.append(line)
+
+    #1) 초기값 설정. X, Y, Z, F 각 정보는 각각의 리스트로 저장됨.
+    XHomepos, YHomepos, ZHomepos, Ffirstval = '0', '0', '0', '1000'
+    X = [0]
+    Y = [0]
+    Z = [0]
+    F =[100]
+    x0 = XHomepos
+    y0 = YHomepos
+    z0 = ZHomepos
+    f0 = Ffirstval
+    #2) 정규표현식을 활용하여 X, Y, Z, E, F에 후행하는 임의의 숫자 패턴 생성.
+    x_coordinate = re.compile('[X]\d*[.]?\d*')
+    y_coordinate = re.compile('[Y]\d*[.]?\d*')
+    z_coordinate = re.compile('[Z]\d*[.]?\d*')
+    e_distance = re.compile('[E]-?\d*[.]?\d*')
+    f_val = re.compile('[F]\d*[.]?\d*')
+    #3) 각 문장에 X, Y, Z, E, F 정보가 존재한다면 해당 정보를 리스트에 담고,
+    #   그렇지 않다면 이전 문장에 존재했던 해당 정보를 리스트에 담는다.
+    #   단, E와 F에 대한 정보만 존재한다면 그 문장은 의미없는 문장이므로 건너뛴다.
+    for line in filtlist:
+        x1 = str(x_coordinate.findall(line)).strip("X[]'")
+        y1 = str(y_coordinate.findall(line)).strip("Y[]'")
+        z1 = str(z_coordinate.findall(line)).strip("Z[]'")
+        e = str(e_distance.findall(line)).strip("E[]'")
+        f1 = str(f_val.findall(line)).strip("F[]'")
+        if not x1 and not y1 and not z1 and e and f1:
+            continue
+        if x1: X.append(float(x1)); x0 = x1
+        else: X.append(float(x0))
+        if y1: Y.append(float(y1)); y0 = y1
+        else: Y.append(float(y0))
+        if z1: Z.append(float(z1)); z0 = z1
+        else: Z.append(float(z0))
+        if f1: F.append(float(f1)); f0 = f1
+        else: F.append(float(f0))
+    X=tuple(X)
+    Y=tuple(Y)
+    Z=tuple(Z)
+    F=tuple(F)
 
 # GUI내에서 다른 탭으로 이동시 호출되는 함수.
 def tabchange(event):

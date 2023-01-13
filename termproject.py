@@ -115,7 +115,7 @@ def drawgraph():
         if str(widget) not in button_list:
             widget.destroy()
     opengcode()
-    gcode2list()
+    gcode2list() 
     filtlist()
     getcoords()
     # 1) 그래프 생성.
