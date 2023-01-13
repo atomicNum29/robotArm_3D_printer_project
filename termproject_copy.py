@@ -1,7 +1,21 @@
 
+import re    # Gcode해석용 정규표현식 모듈.
 import tkinter    # GUI tkinter 모듈.
 import tkinter.ttk    # GUI 추가 위젯 모듈.
 import tkinter.font    # GUI 추가 폰트 모듈.
+from tkinter import filedialog    # 파일 가져오기용 모듈.
+
+# 전역 변수의 선언
+gcode_dir = None
+gcode_name = None
+
+# GCODE 파일의 경로와 이름을 알아낸다.
+def openGCODE():
+    global gcode_dir, gcode_name
+    gcode_dir = filedialog.askopenfile(filetypes=(('gcode files', '*.gcode'), ('all types', '*.*')))
+    gcode_name = re.findall('[a-zA-Z]*[.]gcode', gcode_dir.name)[0].removesuffix('.gcode')
+    print(gcode_dir.name)
+    print(gcode_name)
 
 # GUI내에서 다른 탭으로 이동시 호출되는 함수.
 def tabchange(event):
@@ -32,7 +46,7 @@ def tab1refresh():
     frameR_t = tkinter.Frame(frame1R, relief='groove', bd=2)
     frameR_t.place(x=12, y=270, width=230, height=270)
     
-    buttonR1 = tkinter.Button(frame1R, text="Import Gcode", relief="solid", command=None)
+    buttonR1 = tkinter.Button(frame1R, text="Import Gcode", relief="solid", command=openGCODE)
     buttonR1.place(x=12, y=30, width=230, height=30)
     buttonR2 = tkinter.Button(frame1R, text="Check Gcode", relief="solid", command=None)
     buttonR2.place(x=12, y=75, width=230, height=30)
