@@ -1,5 +1,6 @@
 
 import re    # Gcode해석용 정규표현식 모듈.
+import pandas    # Gcode 내부 저장 및 데이터프레임 생성용 pandas 모듈.
 import tkinter    # GUI tkinter 모듈.
 import tkinter.ttk    # GUI 추가 위젯 모듈.
 import tkinter.font    # GUI 추가 폰트 모듈.
@@ -49,6 +50,9 @@ def clearinfo():
 def openGCODE():
     global gcode_dir, gcode_name
     gcode_dir = filedialog.askopenfile(filetypes=(('gcode files', '*.gcode'), ('all types', '*.*')))
+    if gcode_dir is None:
+        inform('import cancled')
+        return
     gcode_name = re.findall('[a-zA-Z]*[.]gcode', gcode_dir.name)[0].removesuffix('.gcode')
     print(gcode_dir.name)
     print(gcode_name)
@@ -104,13 +108,31 @@ def openGCODE():
     # F=tuple(F)
     inform(f'import {gcode_dir.name} done')
 
+# 필터링된 Gcode를 텍스트로 저장한 뒤 GUI에 띄우는 함수.
+def openfilteredtxt():
+    data = pandas.DataFrame({'Xi':X, 'Yi':Y, 'Zi':Z}, columns=['Xi','Yi','Zi','','J1','J2','J3','J4','J5','J6','J7','','Xf','Yf','Zf'])
+    frame1L = window.children['!frame'].children['!frame']
+    widgetList = frame1L.winfo_children()
+    for widget in widgetList:
+        if not widget.winfo_name().startswith('!button'):
+            widget.destroy()
+    txt_edit = tkinter.Text(frame1L)
+    txt_edit.place(x=0,y=0, width=797, height=498)
+    for i in data.index:
+        valx = data.iloc[i, 0]
+        valy = data.iloc[i, 1]
+        valz = data.iloc[i, 2]
+        txt_edit.insert(tkinter.END, f' G1  X{valx}  Y{valy}  Z{valz}\n')
+    inform('filtered gcode opened.')
+
 # 생성된 X,Y,Z가 정상인지 확인하기 위해 numpy에서 3차원 plot으로 시각화해서 확인함.
 def drawgraph():
     global X, Y, Z, F
     frame1L = window.children['!frame'].children['!frame']
-    if '!canvas' in frame1L.children.keys():
-        frame1L.children['!canvas'].destroy()
-        frame1L.children['!navigationtoolbar2tk'].destroy()
+    widgetList = frame1L.winfo_children()
+    for widget in widgetList:
+        if not widget.winfo_name().startswith('!button'):
+            widget.destroy()
     # 1) 그래프 생성.
     fig = Figure(figsize=(10,10), dpi=500)
     ax = fig.add_subplot(projection='3d')
@@ -157,7 +179,7 @@ def tab1refresh():
     buttonR1.place(x=12, y=30, width=230, height=30)
     buttonR2 = tkinter.Button(frame1R, text="Check Gcode", relief="solid", command=None)
     buttonR2.place(x=12, y=75, width=230, height=30)
-    buttonR3 = tkinter.Button(frame1R, text="See Filtered gcode", relief="solid", command=None)
+    buttonR3 = tkinter.Button(frame1R, text="See Filtered gcode", relief="solid", command=openfilteredtxt)
     buttonR3.place(x=12, y=120, width=230, height=30)
     buttonR4 = tkinter.Button(frame1R, text="Export", relief="solid", command=None)
     buttonR4.place(x=12, y=165, width=230, height=30)
