@@ -173,12 +173,32 @@ def opentxt():
         inform('import gcode plz')
         return
     frame1L = window.children['!frame'].children['!frame']
+    widgetList = frame1L.winfo_children()
+    for widget in widgetList:
+        if not widget.winfo_name().startswith('!button'):
+            widget.destroy()
     txt_edit = tkinter.Text(frame1L)
     txt_edit.place(x=0,y=0, width=797, height=497)
     with open(gcode_dir.name, "r") as input_file:
         text = input_file.read()
         txt_edit.insert(tkinter.END, text)
     inform(f'gcode opened. you can edit {gcode_name}. please save after editing.')
+
+# 수정한 Gcode를 텍스트로 저장하는 함수.
+def savetxt():
+    global gcode_dir
+    if gcode_dir is None:
+        inform('no have gcode directory')
+        return
+    frame1L = window.children['!frame'].children['!frame']
+    if not '!text' in frame1L.children.keys():
+        inform('no changed gcode')
+        return
+    txt_edit = frame1L.children['!text']
+    with open(gcode_dir.name, "w") as output_file:
+        text = txt_edit.get(1.0, tkinter.END)
+        output_file.write(text)
+    inform('file saved')
 
 # GUI내에서 다른 탭으로 이동시 호출되는 함수.
 def tabchange(event):
@@ -197,7 +217,7 @@ def tab1refresh():
     buttonL1.place(x=15, y=499, width=90, height=41)
     buttonL2 = tkinter.Button(frame1L, text="Edit Gcode", relief="solid", command=opentxt)
     buttonL2.place(x=110, y=499, width=90, height=41)
-    buttonL3 = tkinter.Button(frame1L, text="Save as.. ", relief="solid", command=None)
+    buttonL3 = tkinter.Button(frame1L, text="Save", relief="solid", command=savetxt)
     buttonL3.place(x=205, y=499, width=90, height=41)
 
     frame1R = tkinter.Frame(frame1, relief="groove", bd=2)
