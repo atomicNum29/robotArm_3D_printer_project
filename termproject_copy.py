@@ -122,7 +122,7 @@ def openfilteredtxt():
         if not widget.winfo_name().startswith('!button'):
             widget.destroy()
     txt_edit = tkinter.Text(frame1L)
-    txt_edit.place(x=0,y=0, width=797, height=498)
+    txt_edit.place(x=0,y=0, width=797, height=497)
     for i in data.index:
         valx = data.iloc[i, 0]
         valy = data.iloc[i, 1]
@@ -166,6 +166,20 @@ def drawgraph():
     canvas.get_tk_widget().place(x=0,y=0, width=800, height=476)
     inform('plot drawing done')
 
+# Gcode 텍스트로 열고 수정하는 함수.
+def opentxt():
+    global gcode_dir, gcode_name
+    if gcode_dir is None:
+        inform('import gcode plz')
+        return
+    frame1L = window.children['!frame'].children['!frame']
+    txt_edit = tkinter.Text(frame1L)
+    txt_edit.place(x=0,y=0, width=797, height=497)
+    with open(gcode_dir.name, "r") as input_file:
+        text = input_file.read()
+        txt_edit.insert(tkinter.END, text)
+    inform(f'gcode opened. you can edit {gcode_name}. please save after editing.')
+
 # GUI내에서 다른 탭으로 이동시 호출되는 함수.
 def tabchange(event):
     tab_id = notebook.select()
@@ -181,7 +195,7 @@ def tab1refresh():
 
     buttonL1 = tkinter.Button(frame1L, text="Plot", relief="solid", command=drawgraph)
     buttonL1.place(x=15, y=499, width=90, height=41)
-    buttonL2 = tkinter.Button(frame1L, text="Edit Gcode", relief="solid", command=None)
+    buttonL2 = tkinter.Button(frame1L, text="Edit Gcode", relief="solid", command=opentxt)
     buttonL2.place(x=110, y=499, width=90, height=41)
     buttonL3 = tkinter.Button(frame1L, text="Save as.. ", relief="solid", command=None)
     buttonL3.place(x=205, y=499, width=90, height=41)
