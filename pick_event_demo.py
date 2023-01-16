@@ -71,7 +71,7 @@ from matplotlib.image import AxesImage
 import numpy as np
 from numpy.random import rand
 
-if 1:  # simple picking, lines, rectangles and text
+if 0:  # simple picking, lines, rectangles and text
     fig, (ax1, ax2) = plt.subplots(2, 1)
     ax1.set_title('click on points, rectangles or text', picker=True)
     ax1.set_ylabel('ylabel', picker=True, bbox=dict(facecolor='red'))
@@ -98,7 +98,7 @@ if 1:  # simple picking, lines, rectangles and text
 
     fig.canvas.mpl_connect('pick_event', onpick1)
 
-if 1:  # picking with a custom hit test function
+if 0:  # picking with a custom hit test function
     # you can define custom pickers by setting picker to a callable
     # function.  The function has the signature
     #
@@ -152,7 +152,7 @@ if 1:  # picking on a scatter plot (matplotlib.collections.RegularPolyCollection
     #fig.savefig('pscoll.eps')
     fig.canvas.mpl_connect('pick_event', onpick3)
 
-if 1:  # picking images (matplotlib.image.AxesImage)
+if 0:  # picking images (matplotlib.image.AxesImage)
     fig, ax = plt.subplots()
     im1 = ax.imshow(rand(10, 5), extent=(1, 2, 1, 2), picker=True)
     im2 = ax.imshow(rand(5, 10), extent=(3, 4, 1, 2), picker=True)

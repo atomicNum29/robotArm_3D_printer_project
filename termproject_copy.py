@@ -103,17 +103,17 @@ def openGCODE():
         else: Z.append(float(z0))
         if f1: F.append(float(f1)); f0 = f1
         else: F.append(float(f0))
-    # X=tuple(X)
-    # Y=tuple(Y)
-    # Z=tuple(Z)
-    # F=tuple(F)
+    X=tuple(X)
+    Y=tuple(Y)
+    Z=tuple(Z)
+    F=tuple(F)
     inform(f'import {gcode_dir.name} done')
 
 # 필터링된 Gcode를 텍스트로 저장한 뒤 GUI에 띄우는 함수.
 def openfilteredtxt():
     global data
-    if data is None:
-        inform('open gcode file before filtering')
+    if not type(X) is tuple:
+        inform('import gcode before filtering')
         return
     data = pandas.DataFrame({'Xi':X, 'Yi':Y, 'Zi':Z}, columns=['Xi','Yi','Zi','','J1','J2','J3','J4','J5','J6','J7','','Xf','Yf','Zf'])
     frame1L = window.children['!frame'].children['!frame']
@@ -227,9 +227,9 @@ def tab1refresh():
     
     buttonR1 = tkinter.Button(frame1R, text="Import Gcode", relief="solid", command=openGCODE)
     buttonR1.place(x=12, y=30, width=230, height=30)
-    buttonR2 = tkinter.Button(frame1R, text="Check Gcode", relief="solid", command=None)
+    buttonR2 = tkinter.Button(frame1R, text="See Filtered gcode", relief="solid", command=openfilteredtxt)
     buttonR2.place(x=12, y=75, width=230, height=30)
-    buttonR3 = tkinter.Button(frame1R, text="See Filtered gcode", relief="solid", command=openfilteredtxt)
+    buttonR3 = tkinter.Button(frame1R, text="Check Gcode", relief="solid", command=None)
     buttonR3.place(x=12, y=120, width=230, height=30)
     buttonR4 = tkinter.Button(frame1R, text="Export", relief="solid", command=exportfilteredgcode)
     buttonR4.place(x=12, y=165, width=230, height=30)
