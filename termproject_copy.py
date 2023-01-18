@@ -130,17 +130,6 @@ def openfilteredtxt():
         txt_edit.insert(tkinter.END, f' G1  X{valx}  Y{valy}  Z{valz}\n')
     inform('filtered gcode opened.')
 
-# 필터링된 Gcode를 매트랩 경로에 저장하는 함수.
-def exportfilteredgcode():
-    global gcode_dir, data
-    if gcode_dir is None or data is None:
-        inform('open gcode and filtering before export')
-        return
-    # gcode 디렉토리에 gcode파일명_coord.xlsx 파일로 저장함.
-    xlsx_dir = f'{gcode_dir.name.removesuffix(".gcode")}_coord.xlsx'
-    data.to_excel(xlsx_dir, sheet_name='XYZ coordinates')
-    inform(f'filtered gcode successfully saved to {xlsx_dir}.')
-
 # 생성된 X,Y,Z가 정상인지 확인하기 위해 numpy에서 3차원 plot으로 시각화해서 확인함.
 def drawgraph():
     global X, Y, Z, F
@@ -231,7 +220,7 @@ def tab1refresh():
     buttonR2.place(x=12, y=75, width=230, height=30)
     buttonR3 = tkinter.Button(frame1R, text="Check Gcode", relief="solid", command=None)
     buttonR3.place(x=12, y=120, width=230, height=30)
-    buttonR4 = tkinter.Button(frame1R, text="Export", relief="solid", command=exportfilteredgcode)
+    buttonR4 = tkinter.Button(frame1R, text="Import URDF", relief="solid", command=None)
     buttonR4.place(x=12, y=165, width=230, height=30)
     clearbtn = tkinter.Button(frame1R, text="clear", relief="solid", command=clearinfo)
     clearbtn.place(x=195, y=244, width=48, height=25)
