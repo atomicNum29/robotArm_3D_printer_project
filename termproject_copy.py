@@ -10,6 +10,9 @@ import matplotlib.pyplot as plt    # 3d 그래프 그리기용 matplot 모듈.
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)    # 3d 그래프 GUI 내부출력용 모듈.
 from matplotlib.backend_bases import key_press_handler    # 3d 그래프 GUI 내부 span용 모듈.
 from matplotlib.figure import Figure    # matplot 모듈 Figure 생성용 모듈.
+# ikpy
+from ikpy.chain import Chain
+import ikpy.utils.plot as plot_utils
 
 # 전역 변수의 선언
 infolist = []
@@ -20,6 +23,8 @@ X = []
 Y = []
 Z = []
 F = []
+urdf_dir = None
+my_chain = None
 
 # 우측하단 프레임에 정보 알림용 라벨 생성 함수.
 def inform(s):
@@ -108,6 +113,36 @@ def openGCODE():
     Z=tuple(Z)
     F=tuple(F)
     inform(f'import {gcode_dir.name} done')
+
+# UREF 파일의 경로와 이름을 알아낸다.
+def openURDF():
+    global my_chain, urdf_dir
+    urdf_dir = filedialog.askopenfile(filetypes=(('URDF files', '*.URDF'), ('all types', '*.*')))
+    if urdf_dir is None:
+        inform('open cancled')
+        return
+    my_chain = Chain.from_urdf_file(urdf_dir.name)
+
+# 불러온 로봇팔을 그려서 보여준다.
+def plot_chain():
+    global my_chain
+    if my_chain is None:
+        inform('null arm error')
+        return
+    frame1L = window.children['!frame'].children['!frame']
+    widgetList = frame1L.winfo_children()
+    for widget in widgetList:
+        if not widget.winfo_name().startswith('!button'):
+            widget.destroy()
+    fig, ax = plot_utils.init_3d_figure()
+    my_chain.plot([0]*len(my_chain.links), ax)
+    canvas = FigureCanvasTkAgg(fig, master=frame1L)
+    canvas.draw()
+    toolbar = NavigationToolbar2Tk(canvas, frame1L, pack_toolbar=False)
+    toolbar.update()
+    toolbar.place(x=0, y=476, width=800, height=25)
+    canvas.get_tk_widget().place(x=0,y=0, width=800, height=476)
+    inform('plot drawing done')
 
 # 필터링된 Gcode를 텍스트로 저장한 뒤 GUI에 띄우는 함수.
 def openfilteredtxt():
@@ -208,6 +243,8 @@ def tab1refresh():
     buttonL2.place(x=110, y=499, width=90, height=41)
     buttonL3 = tkinter.Button(frame1L, text="Save", relief="solid", command=savetxt)
     buttonL3.place(x=205, y=499, width=90, height=41)
+    buttonL4 = tkinter.Button(frame1L, text="plot arm", relief="solid", command=plot_chain)
+    buttonL4.place(x=300, y=499, width=90, height=41)
 
     frame1R = tkinter.Frame(frame1, relief="groove", bd=2)
     frame1R.place(x=800,y=0, width=258, height=552)
@@ -220,7 +257,7 @@ def tab1refresh():
     buttonR2.place(x=12, y=75, width=230, height=30)
     buttonR3 = tkinter.Button(frame1R, text="Check Gcode", relief="solid", command=None)
     buttonR3.place(x=12, y=120, width=230, height=30)
-    buttonR4 = tkinter.Button(frame1R, text="Import URDF", relief="solid", command=None)
+    buttonR4 = tkinter.Button(frame1R, text="Import URDF", relief="solid", command=openURDF)
     buttonR4.place(x=12, y=165, width=230, height=30)
     clearbtn = tkinter.Button(frame1R, text="clear", relief="solid", command=clearinfo)
     clearbtn.place(x=195, y=244, width=48, height=25)
