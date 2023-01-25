@@ -66,15 +66,16 @@ def openGCODE():
     with open(gcode_dir.name, 'r') as gcode:
         loadlines = list(map(str.strip, gcode.readlines()))
 
+    # G1으로 시작하는 문자열만 잘라넣기 위한 리스트
     filtlist = []
-
+    # G1으로 시작하는 문장만 저장한다.
     for line in loadlines:
         if line.startswith('G1'):
             filtlist.append(line)
 
     #1) 초기값 설정. X, Y, Z, F 각 정보는 각각의 리스트로 저장됨.
     XHomepos, YHomepos, ZHomepos, Ffirstval = '0', '0', '0', '1000'
-    global X, Y, Z, F
+    global X, Y, Z, F, data
     X = [0]
     Y = [0]
     Z = [0]
@@ -84,34 +85,36 @@ def openGCODE():
     z0 = ZHomepos
     f0 = Ffirstval
     #2) 정규표현식을 활용하여 X, Y, Z, E, F에 후행하는 임의의 숫자 패턴 생성.
-    x_coordinate = re.compile('[X]\d*[.]?\d*')
-    y_coordinate = re.compile('[Y]\d*[.]?\d*')
-    z_coordinate = re.compile('[Z]\d*[.]?\d*')
-    e_distance = re.compile('[E]-?\d*[.]?\d*')
-    f_val = re.compile('[F]\d*[.]?\d*')
+    x_coordinate = re.compile('(?<=X)[-+]?\d*[.]?\d*')
+    y_coordinate = re.compile('(?<=Y)[-+]?\d*[.]?\d*')
+    z_coordinate = re.compile('(?<=Z)[-+]?\d*[.]?\d*')
+    e_distance = re.compile('(?<=E)[-+]?\d*[.]?\d*')
+    f_val = re.compile('(?<=F)[-+]?\d*[.]?\d*')
     #3) 각 문장에 X, Y, Z, E, F 정보가 존재한다면 해당 정보를 리스트에 담고,
     #   그렇지 않다면 이전 문장에 존재했던 해당 정보를 리스트에 담는다.
     #   단, E와 F에 대한 정보만 존재한다면 그 문장은 의미없는 문장이므로 건너뛴다.
     for line in filtlist:
-        x1 = str(x_coordinate.findall(line)).strip("X[]'")
-        y1 = str(y_coordinate.findall(line)).strip("Y[]'")
-        z1 = str(z_coordinate.findall(line)).strip("Z[]'")
-        e = str(e_distance.findall(line)).strip("E[]'")
-        f1 = str(f_val.findall(line)).strip("F[]'")
-        if not x1 and not y1 and not z1 and e and f1:
+        x1 = x_coordinate.findall(line)
+        y1 = y_coordinate.findall(line)
+        z1 = z_coordinate.findall(line)
+        e = e_distance.findall(line)
+        f1 = f_val.findall(line)
+        # x1, y1, z1 모두 정보가 없으면 건너뜀.
+        if not( len(x1) or len(y1) or len(z1) ):
             continue
-        if x1: X.append(float(x1)); x0 = x1
+        if len(x1): X.append(float(x1[0])); x0 = x1[0]
         else: X.append(float(x0))
-        if y1: Y.append(float(y1)); y0 = y1
+        if len(y1): Y.append(float(y1[0])); y0 = y1[0]
         else: Y.append(float(y0))
-        if z1: Z.append(float(z1)); z0 = z1
+        if len(z1): Z.append(float(z1[0])); z0 = z1[0]
         else: Z.append(float(z0))
-        if f1: F.append(float(f1)); f0 = f1
+        if len(f1): F.append(float(f1[0])); f0 = f1[0]
         else: F.append(float(f0))
     X=tuple(X)
     Y=tuple(Y)
     Z=tuple(Z)
     F=tuple(F)
+    data = pandas.DataFrame({'Xi':X, 'Yi':Y, 'Zi':Z}, columns=['Xi','Yi','Zi','','J1','J2','J3','J4','J5','J6','J7','','Xf','Yf','Zf'])
     inform(f'import {gcode_dir.name} done')
 
 # URDF 파일의 경로와 이름을 알아낸다.
@@ -148,10 +151,9 @@ def plot_chain():
 # 필터링된 Gcode를 텍스트로 저장한 뒤 GUI에 띄우는 함수.
 def openfilteredtxt():
     global data
-    if not type(X) is tuple:
+    if data is None:
         inform('import gcode before filtering')
         return
-    data = pandas.DataFrame({'Xi':X, 'Yi':Y, 'Zi':Z}, columns=['Xi','Yi','Zi','','J1','J2','J3','J4','J5','J6','J7','','Xf','Yf','Zf'])
     frame1L = window.children['!frame'].children['!frame']
     widgetList = frame1L.winfo_children()
     for widget in widgetList:
@@ -254,9 +256,9 @@ def tab1refresh():
     
     buttonR1 = tkinter.Button(frame1R, text="Import Gcode", relief="solid", command=openGCODE)
     buttonR1.place(x=12, y=30, width=230, height=30)
-    buttonR2 = tkinter.Button(frame1R, text="See Filtered gcode", relief="solid", command=openfilteredtxt)
+    buttonR2 = tkinter.Button(frame1R, text="Check Gcode", relief="solid", command=None)
     buttonR2.place(x=12, y=75, width=230, height=30)
-    buttonR3 = tkinter.Button(frame1R, text="Check Gcode", relief="solid", command=None)
+    buttonR3 = tkinter.Button(frame1R, text="See Filtered gcode", relief="solid", command=openfilteredtxt)
     buttonR3.place(x=12, y=120, width=230, height=30)
     buttonR4 = tkinter.Button(frame1R, text="Import URDF", relief="solid", command=openURDF)
     buttonR4.place(x=12, y=165, width=230, height=30)
