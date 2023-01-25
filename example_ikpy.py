@@ -26,7 +26,7 @@ left_arm_chain = Chain(name='left_arm', links=[
     )
 ])
 
-target_position = [ 5, 0, 0]
+target_position = [ 10, 0, 0]
 
 print("The angles of each joints are : ", left_arm_chain.inverse_kinematics(target_position))
 

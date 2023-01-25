@@ -9,7 +9,7 @@ import numpy as np    # 행렬식 표현 및 행렬연산용 넘파이 모듈.
 import matplotlib.pyplot as plt    # 3d 그래프 그리기용 matplot 모듈.
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)    # 3d 그래프 GUI 내부출력용 모듈.
 from matplotlib.backend_bases import key_press_handler    # 3d 그래프 GUI 내부 span용 모듈.
-from matplotlib.figure import Figure    # matplot 모듈 Figure 생성용 모듈.
+# from matplotlib.figure import Figure    # matplot 모듈 Figure 생성용 모듈.
 # ikpy
 from ikpy.chain import Chain
 import ikpy.utils.plot as plot_utils
@@ -114,7 +114,7 @@ def openGCODE():
     F=tuple(F)
     inform(f'import {gcode_dir.name} done')
 
-# UREF 파일의 경로와 이름을 알아낸다.
+# URDF 파일의 경로와 이름을 알아낸다.
 def openURDF():
     global my_chain, urdf_dir
     urdf_dir = filedialog.askopenfile(filetypes=(('URDF files', '*.URDF'), ('all types', '*.*')))
@@ -122,6 +122,7 @@ def openURDF():
         inform('open cancled')
         return
     my_chain = Chain.from_urdf_file(urdf_dir.name)
+    inform(f'imported URDF from {urdf_dir.name}')
 
 # 불러온 로봇팔을 그려서 보여준다.
 def plot_chain():
@@ -142,7 +143,7 @@ def plot_chain():
     toolbar.update()
     toolbar.place(x=0, y=476, width=800, height=25)
     canvas.get_tk_widget().place(x=0,y=0, width=800, height=476)
-    inform('plot drawing done')
+    inform('chain plot done')
 
 # 필터링된 Gcode를 텍스트로 저장한 뒤 GUI에 띄우는 함수.
 def openfilteredtxt():
@@ -174,7 +175,7 @@ def drawgraph():
         if not widget.winfo_name().startswith('!button'):
             widget.destroy()
     # 1) 그래프 생성.
-    fig = Figure(figsize=(10,10), dpi=500)
+    fig = plt.figure(figsize=(10,10), dpi=500)
     ax = fig.add_subplot(projection='3d')
     ax.plot(X, Y, Z, linewidth=0.1, alpha = 0.8)
     # ax.set_xlim(40,80)
