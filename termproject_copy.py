@@ -23,6 +23,9 @@ X = []
 Y = []
 Z = []
 F = []
+X2 = [0]
+Y2 = [0]
+Z2 = [0]
 urdf_dir = None
 my_chain = None
 
@@ -76,6 +79,7 @@ def openGCODE():
     #1) 초기값 설정. X, Y, Z, F 각 정보는 각각의 리스트로 저장됨.
     XHomepos, YHomepos, ZHomepos, Ffirstval = '0', '0', '0', '1000'
     global X, Y, Z, F, data
+    global X2, Y2, Z2
     X = [0]
     Y = [0]
     Z = [0]
@@ -114,6 +118,13 @@ def openGCODE():
     Y=tuple(Y)
     Z=tuple(Z)
     F=tuple(F)
+    for i in range(len(X)):
+        X2.append(X[i] / 200)
+        Y2.append(Y[i] / 200)
+        Z2.append(Z[i] / 200)
+    X2 = tuple(X2)
+    Y2 = tuple(Y2)
+    Z2 = tuple(Z2)
     data = pandas.DataFrame({'Xi':X, 'Yi':Y, 'Zi':Z}, columns=['Xi','Yi','Zi','','J1','J2','J3','J4','J5','J6','J7','','Xf','Yf','Zf'])
     inform(f'import {gcode_dir.name} done')
 
@@ -148,6 +159,52 @@ def plot_chain():
     canvas.get_tk_widget().place(x=0,y=0, width=800, height=476)
     inform('chain plot done')
 
+# 한 점에 대한 로봇팔의 IK 연산 결과를 보자.
+def plot_IK():
+    global X, Y, Z
+    global X2, Y2, Z2
+    global my_chain
+    if my_chain is None:
+        inform("don't have arm")
+        return
+    if type(X2) is not tuple:
+        inform("don't have GCODE data")
+    # 죄측 plot figure 배치 frame 추출 및 기타 widget destroy
+    frame1L = window.children['!frame'].children['!frame']
+    widgetList = frame1L.winfo_children()
+    for widget in widgetList:
+        if not widget.winfo_name().startswith('!button'):
+            widget.destroy()
+    
+    # 1) 그래프 생성.
+    fig = plt.figure(figsize=(10,10), dpi=500)
+    # 왼쪽 그래프는 GCODE 좌표 기반 그래프임.
+    ax1 = fig.add_subplot(2, 2, (1, 1), projection='3d')
+    ax1.plot(X2, Y2, Z2, linewidth=0.1, alpha = 0.8)
+    ax1.set_aspect('equal')
+    # 우측 그래프는 IK 후 FK로 연산된 좌표 기반 그래프임.
+    armX = []
+    armY = []
+    armZ = []
+    # 각 좌표에 대해 IK 와 FK를 계산함.
+    for i in range(len(X2)):
+        real_frame = my_chain.forward_kinematics(my_chain.inverse_kinematics([X2[i], Y2[i], Z2[i]]))
+        armX.append(real_frame[0, 3])
+        armY.append(real_frame[1, 3])
+        armZ.append(real_frame[2, 3])
+        inform(f'{i} / {len(X2)}')
+    ax2 = fig.add_subplot(2, 2, (1, 2), projection='3d')
+    ax2.plot(armX, armY, armZ, linewidth=0.1, alpha = 0.8)
+    ax2.set_aspect('equal')
+    # 2) GUI에 canvas로 그림.
+    canvas = FigureCanvasTkAgg(fig, master=frame1L)
+    canvas.draw()
+    toolbar = NavigationToolbar2Tk(canvas, frame1L, pack_toolbar=False)
+    toolbar.update()
+    toolbar.place(x=0, y=476, width=800, height=25)
+    canvas.get_tk_widget().place(x=0,y=0, width=800, height=476)
+    inform('plot drawing done')
+
 # 필터링된 Gcode를 텍스트로 저장한 뒤 GUI에 띄우는 함수.
 def openfilteredtxt():
     global data
@@ -171,6 +228,7 @@ def openfilteredtxt():
 # 생성된 X,Y,Z가 정상인지 확인하기 위해 numpy에서 3차원 plot으로 시각화해서 확인함.
 def drawgraph():
     global X, Y, Z, F
+    global X2, Y2, Z2
     frame1L = window.children['!frame'].children['!frame']
     widgetList = frame1L.winfo_children()
     for widget in widgetList:
@@ -179,7 +237,7 @@ def drawgraph():
     # 1) 그래프 생성.
     fig = plt.figure(figsize=(10,10), dpi=500)
     ax = fig.add_subplot(projection='3d')
-    ax.plot(X, Y, Z, linewidth=0.1, alpha = 0.8)
+    ax.plot(X2, Y2, Z2, linewidth=0.1, alpha = 0.8)
     # ax.set_xlim(40,80)
     # ax.set_ylim(40,80)
     # ax.set_zlim(-1,39)
@@ -248,6 +306,8 @@ def tab1refresh():
     buttonL3.place(x=205, y=499, width=90, height=41)
     buttonL4 = tkinter.Button(frame1L, text="plot arm", relief="solid", command=plot_chain)
     buttonL4.place(x=300, y=499, width=90, height=41)
+    buttonL5 = tkinter.Button(frame1L, text="plot IK", relief="solid", command=plot_IK)
+    buttonL5.place(x=395, y=499, width=90, height=41)
 
     frame1R = tkinter.Frame(frame1, relief="groove", bd=2)
     frame1R.place(x=800,y=0, width=258, height=552)
