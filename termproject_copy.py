@@ -179,9 +179,6 @@ def plot_IK():
     # 1) 그래프 생성.
     fig = plt.figure(figsize=(10,10), dpi=500)
     # 왼쪽 그래프는 GCODE 좌표 기반 그래프임.
-    ax1 = fig.add_subplot(2, 2, (1, 1), projection='3d')
-    ax1.plot(X2, Y2, Z2, linewidth=0.1, alpha = 0.8)
-    ax1.set_aspect('equal')
     # 우측 그래프는 IK 후 FK로 연산된 좌표 기반 그래프임.
     armX = []
     armY = []
@@ -193,7 +190,7 @@ def plot_IK():
         armY.append(real_frame[1, 3])
         armZ.append(real_frame[2, 3])
         inform(f'{i} / {len(X2)}')
-    ax2 = fig.add_subplot(2, 2, (1, 2), projection='3d')
+    ax2 = fig.add_subplot(projection='3d')
     ax2.plot(armX, armY, armZ, linewidth=0.1, alpha = 0.8)
     ax2.set_aspect('equal')
     # 2) GUI에 canvas로 그림.
