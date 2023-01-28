@@ -119,9 +119,9 @@ def openGCODE():
     Z=tuple(Z)
     F=tuple(F)
     for i in range(len(X)):
-        X2.append(X[i] / 200)
-        Y2.append(Y[i] / 200)
-        Z2.append(Z[i] / 200)
+        X2.append(X[i] / 1000)
+        Y2.append(Y[i] / 1000)
+        Z2.append(Z[i] / 1000)
     X2 = tuple(X2)
     Y2 = tuple(Y2)
     Z2 = tuple(Z2)
@@ -159,7 +159,7 @@ def plot_chain():
     canvas.get_tk_widget().place(x=0,y=0, width=800, height=476)
     inform('chain plot done')
 
-# 한 점에 대한 로봇팔의 IK 연산 결과를 보자.
+# "한 점"에 대한 로봇팔의 IK 연산 결과를 보자.
 def plot_IK():
     global X, Y, Z
     global X2, Y2, Z2
@@ -178,8 +178,6 @@ def plot_IK():
     
     # 1) 그래프 생성.
     fig = plt.figure(figsize=(10,10), dpi=500)
-    # 왼쪽 그래프는 GCODE 좌표 기반 그래프임.
-    # 우측 그래프는 IK 후 FK로 연산된 좌표 기반 그래프임.
     armX = []
     armY = []
     armZ = []
