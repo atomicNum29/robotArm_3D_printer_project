@@ -6,6 +6,7 @@ import tkinter.ttk    # GUI 추가 위젯 모듈.
 import tkinter.font    # GUI 추가 폰트 모듈.
 from tkinter import filedialog    # 파일 가져오기용 모듈.
 import numpy as np    # 행렬식 표현 및 행렬연산용 넘파이 모듈.
+from matplotlib.widgets import Slider
 import matplotlib.pyplot as plt    # 3d 그래프 그리기용 matplot 모듈.
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)    # 3d 그래프 GUI 내부출력용 모듈.
 from matplotlib.backend_bases import key_press_handler    # 3d 그래프 GUI 내부 span용 모듈.
@@ -177,20 +178,42 @@ def plot_IK():
             widget.destroy()
     
     # 1) 그래프 생성.
-    fig = plt.figure(figsize=(10,10), dpi=500)
-    armX = []
-    armY = []
-    armZ = []
-    # 각 좌표에 대해 IK 와 FK를 계산함.
-    for i in range(len(X2)):
-        real_frame = my_chain.forward_kinematics(my_chain.inverse_kinematics([X2[i], Y2[i], Z2[i]]))
-        armX.append(real_frame[0, 3])
-        armY.append(real_frame[1, 3])
-        armZ.append(real_frame[2, 3])
-        inform(f'{i} / {len(X2)}')
-    ax2 = fig.add_subplot(projection='3d')
-    ax2.plot(armX, armY, armZ, linewidth=0.1, alpha = 0.8)
-    ax2.set_aspect('equal')
+    # fig = plt.figure(figsize=(10,10), dpi=500)
+    # ax = fig.add_subplot(111, projection='3d')
+    fig, ax = plot_utils.init_3d_figure()
+    # 어느 좌표에 대해 그릴 지 입력받을 슬라이더를 만들고
+    fig.subplots_adjust(bottom=0.2)
+    axSlider = fig.add_axes([0.2, 0.1, 0.65, 0.03])
+    initalVal = len(X2)//2
+    point_slider = Slider(
+        ax=axSlider,
+        label='point',
+        valmin=0,
+        valmax=len(X2),
+        valinit=initalVal,
+        valstep=1,
+    )
+    # 그 좌표에 대해 엔드 이펙터의 방향까지 고려해 계산한 결과를
+    # 로봇팔과 함께 그려주는 코드를 작성하였다.
+    def update(val):
+        ax.clear()
+        target_position = [ X2[val], Y2[val], Z2[val]]
+        target_orientation = [0, 0, -1]
+        orientation_axis = "Z"
+        stateofArm = my_chain.inverse_kinematics(target_position, target_orientation, orientation_axis)
+        my_chain.plot(stateofArm, ax, target_position)
+        ax.set_xlim(-0.1, 0.1)
+        ax.set_ylim(-0.1, 0.1)
+        ax.set_zlim(-0.1, 0.1)
+    point_slider.on_changed(update)
+    target_position = [ X2[initalVal], Y2[initalVal], Z2[initalVal]]
+    target_orientation = [0, 0, -1]
+    orientation_axis = "Z"
+    stateofArm = my_chain.inverse_kinematics(target_position, target_orientation, orientation_axis)
+    my_chain.plot(stateofArm, ax, target_position)
+    ax.set_xlim(-0.1, 0.1)
+    ax.set_ylim(-0.1, 0.1)
+    ax.set_zlim(-0.1, 0.1)
     # 2) GUI에 canvas로 그림.
     canvas = FigureCanvasTkAgg(fig, master=frame1L)
     canvas.draw()

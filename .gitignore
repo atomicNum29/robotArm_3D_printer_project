@@ -1,3 +1,4 @@
 data_files/*
 example_ikpy.py
 pick_event_demo.py
+matplotlib_example_*
