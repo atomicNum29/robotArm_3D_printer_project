@@ -27,6 +27,7 @@ F = []
 X2 = [0]
 Y2 = [0]
 Z2 = [0]
+layer = []
 urdf_dir = None
 my_chain = None
 
@@ -192,14 +193,13 @@ def plot_IK():
         valmax=len(X2),
         valinit=initalVal,
         valstep=1,
+        dragging=True
     )
     # 그 좌표에 대해 엔드 이펙터의 방향까지 고려해 계산한 결과를
     # 로봇팔과 함께 그려주는 코드를 작성하였다.
     def update(val):
         ax.clear()
         target_position = [ X2[val], Y2[val], Z2[val]]
-        target_orientation = [0, 0, -1]
-        orientation_axis = "Z"
         stateofArm = my_chain.inverse_kinematics(target_position, target_orientation, orientation_axis)
         my_chain.plot(stateofArm, ax, target_position)
         ax.set_xlim(-0.1, 0.1)
